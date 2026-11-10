@@ -147,21 +147,7 @@
 <section class="section" id="benchmark">
   <div class="wrap">
     <h2 class="kicker">Benchmark</h2>
-    <h3 class="title">Four principles, four curation stages</h3>
-    <div class="principles">
-      <div class="pcard"><div class="pnum">i</div><h4>Error taxonomy</h4><p>Failure modes span a controlled set of task-specific categories grounded in prior literature, so coarse and subtle errors are not collapsed into one metric.</p></div>
-      <div class="pcard"><div class="pnum">ii</div><h4>Instance diversity</h4><p>24 public CV sources covering single-/multi-class, single-/multi-instance and varying-density scenes.</p></div>
-      <div class="pcard"><div class="pnum">iii</div><h4>Hierarchical candidates</h4><p>2–6 ranked candidates per (image, task), mixing model-zoo predictions with synthetically perturbed hard negatives.</p></div>
-      <div class="pcard"><div class="pnum">iv</div><h4>Encoding space</h4><p>49 image, text and mixed-modality formats per task, swept at evaluation time from the native prediction.</p></div>
-    </div>
-    <ol class="pipeline">
-      <li><span class="step">1</span><div><h4>Candidate generation</h4><p>A legacy-to-SOTA model zoo, expanded by test-time augmentation and post-processing sweeps (NMS thresholds, score cut-offs), plus rule-based perturbations (detection, pose) and LabelMe-crafted failures (dense segmentation).</p></div></li>
-      <li><span class="step">2</span><div><h4>Fine-grained review</h4><p>Single-metric tasks are ordered by raw score; multi-metric tasks (depth) need strict Pareto dominance; detection and segmentation enforce class-wise dominance; generation goes directly to human annotation.</p></div></li>
-      <li><span class="step">3</span><div><h4>Human verification</h4><p>Annotators rank candidates of the same source image under identical task and prompt configurations; only groups with strong human–metric consensus are kept.</p></div></li>
-      <li><span class="step">4</span><div><h4>Question generation</h4><p>Each ranked group yields <b>pairwise</b>, <b>scoring</b> (0–10) and <b>ranking</b> prompts through one skeleton: judge intro → format description → options → final question.</p></div></li>
-    </ol>
-
-    <h3 class="title sm">Generation &amp; low-level vision: can you judge them?</h3>
+    <h3 class="title">Generation &amp; low-level vision: can you judge them?</h3>
     <p class="desc">Ranked candidates from the generative and restoration subsets. The options are shown in a shuffled order; click <b>Reveal</b> to see the ground-truth ranking.</p>
     <div class="gallery" id="gallery"></div>
 

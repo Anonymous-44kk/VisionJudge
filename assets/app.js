@@ -199,7 +199,7 @@
   });
 
   /* ---------- gallery ---------- */
-  const gal = $('#gallery');
+  const gal = $('#gallery') || document.createElement('div');   // gallery section is no longer on the page
   D.gallery.forEach((g, gi) => {
     const n = g.cands.length, order = [...Array(n).keys()];
     for (let i = n - 1; i > 0; i--) { const j = (gi * 7 + i * 3 + 1) % (i + 1); [order[i], order[j]] = [order[j], order[i]]; }

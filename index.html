@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vision-Judge</title>
+<meta name="description" content="Vision-Judge: evaluating multimodal large language models as judges of vision-tool outputs across 7 task categories, 1,949 ranked groups (5,832 candidates) and 49 answer encodings.">
+<meta name="referrer" content="no-referrer">
+<meta property="og:title" content="Vision-Judge: Evaluating MLLMs as Judges for Vision Tasks">
+<meta property="og:description" content="A benchmark of MLLM judges on structured vision-tool outputs: boxes, masks, keypoints, depth maps, generations and restorations.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%235b5bf7'/%3E%3Cpath d='M7 16c3-6 15-6 18 0-3 6-15 6-18 0z' fill='none' stroke='white' stroke-width='2.4'/%3E%3Ccircle cx='16' cy='16' r='3.2' fill='white'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<nav class="topnav" id="topnav">
+  <a class="brand" href="#top"><span class="logo-dot"></span>Vision-Judge</a>
+  <div class="navlinks">
+    <a href="#recommend">Recommended order</a>
+    <a href="#explorer">Explorer</a>
+    <a href="#agents">In agents</a>
+    <a href="#benchmark">Benchmark</a>
+    <a href="#data">Data</a>
+  </div>
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+    <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9z"/></svg>
+  </button>
+</nav>
+
+<header class="hero" id="top">
+  <div class="hero-inner">
+    <div class="venue-pill">Anonymous submission · under double-blind review</div>
+    <h1><span class="grad">Vision-Judge</span><br><span class="subtitle">Evaluating Multimodal LLMs as Judges for Vision Tasks</span></h1>
+    <p class="authors">Anonymous Authors</p>
+    <div class="cta">
+      <a class="btn primary" href="https://huggingface.co/datasets/Anonymous-44kk/Vision-Judge" target="_blank" rel="noopener noreferrer">
+        <svg viewBox="0 0 24 24" width="16" height="16"><ellipse cx="12" cy="5" rx="8" ry="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3" fill="none" stroke="currentColor" stroke-width="2"/></svg>Dataset</a>
+      <a class="btn" href="https://github.com/Anonymous-44kk/VisionJudge" target="_blank" rel="noopener noreferrer">
+        <svg viewBox="0 0 16 16" width="16" height="16"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>Code</a>
+      <a class="btn" href="#recommend"><span class="btn-ico">↧</span>Recommended encodings</a>
+      <a class="btn" href="#bibtex"><span class="btn-ico">❝</span>BibTeX</a>
+    </div>
+  </div>
+  <div class="mosaic" id="mosaic" aria-label="Auto-morphing preview of tool-output encodings for six vision tasks"></div>
+  <p class="mosaic-cap">Every tile is <b>one</b> tool prediction re-encoded on the fly: the same boxes, masks, keypoints and depth maps wipe between
+    overlay, separate-canvas, colour and opacity variants. Judges see exactly these renders.</p>
+</header>
+
+<main>
+
+<section class="section tldr">
+  <div class="wrap">
+    <h2 class="kicker">TL;DR</h2>
+    <p class="lead">Tool-using MLLM agents must <em>read</em> the outputs of vision tools (boxes, masks, keypoints, depth maps) before acting on them, and
+      <b>how</b> a tool's output is encoded back into the model changes how well it is read: the best and worst encoding of the same prediction differ by
+      <b>10–20 pp</b> of judging accuracy. <b>Vision-Judge</b> sweeps 49 encodings with 36 MLLM judges and gives a <b>recommended encoding order for every task</b>,
+      which we then validate inside tool-using agents.</p>
+    <div class="stats" id="stats">
+      <div class="stat"><span class="num" data-to="36">0</span><span class="lbl">MLLM judges</span></div>
+      <div class="stat"><span class="num" data-to="7">0</span><span class="lbl">task categories</span></div>
+      <div class="stat"><span class="num" data-to="1949">0</span><span class="lbl">ranked groups</span></div>
+      <div class="stat"><span class="num" data-to="5832">0</span><span class="lbl">ranked candidates</span></div>
+      <div class="stat"><span class="num" data-to="1441">0</span><span class="lbl">unique images</span></div>
+      <div class="stat"><span class="num" data-to="49">0</span><span class="lbl">answer encodings</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="section alt" id="recommend">
+  <div class="wrap">
+    <h2 class="kicker">Main result</h2>
+    <h3 class="title">Recommended encoding order, per task</h3>
+    <p class="desc">Encodings ranked by their <b>median pairwise judging accuracy across judges</b> on the controlled encoding-analysis subset (prompt, candidate pair and
+      ground-truth winner held fixed; only the encoding changes). <b>①</b> is what we recommend feeding back to an MLLM for that tool; the bar shows the median, the dashed line chance (0.5).
+      Click any row to open it in the explorer.</p>
+    <div class="rec-grid" id="recGrid"></div>
+  </div>
+</section>
+
+<section class="section" id="explorer">
+  <div class="wrap">
+    <h2 class="kicker">Interactive</h2>
+    <h3 class="title">Encoding Explorer</h3>
+    <p class="desc">The encoding space is factorised as <span class="math">E = I × T × Z</span>: image-side variables, text-side variables, and the modality mix
+      (image-only, text-only, image + text). For each task a <b>base</b> encoding mirrors typical tool output, and each ablation changes one factor.
+      Pick a task and a candidate. The viewer <b>auto-stitches</b> through every encoding of the <em>same</em> prediction; switch to <b>Compare</b> and drag the seam to diff two encodings.
+      All renders below come from the benchmark's own encoders.</p>
+
+    <div class="explorer">
+      <div class="task-tabs" id="taskTabs" role="tablist"></div>
+      <div class="ex-grid">
+        <div class="stage-col">
+          <div class="stage-toolbar">
+            <div class="seg" id="modeSeg">
+              <button data-mode="auto" class="on">▶ Auto-stitch</button>
+              <button data-mode="compare">⇔ Compare</button>
+            </div>
+            <div class="cand" id="candSeg"></div>
+            <button class="ghost" id="peekBtn" title="Hold to show the input image">◉ Hold for input</button>
+          </div>
+          <div class="stage" id="stage">
+            <img class="layer base" id="layerBase" alt="">
+            <img class="layer top" id="layerTop" alt="">
+            <div class="code-layer" id="codeLayer"><pre id="codeText"></pre></div>
+            <div class="seam" id="seam"><span class="seam-handle">⇔</span></div>
+            <div class="stage-label left" id="labelL"></div>
+            <div class="stage-label right" id="labelR"></div>
+            <div class="progress"><div id="progressBar"></div></div>
+          </div>
+          <div class="stage-meta" id="stageMeta"></div>
+        </div>
+        <aside class="enc-col">
+          <div class="enc-head"><span>Encodings</span><span class="hint" id="encHint">click to jump</span></div>
+          <ol class="enc-list" id="encList"></ol>
+          <div class="fmt-card">
+            <div class="fmt-title">What the judge reads <span class="fmt-sub">format description shipped with this encoding</span></div>
+            <pre class="fmt" id="fmtText"></pre>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section alt" id="agents">
+  <div class="wrap">
+    <h2 class="kicker">From judge to agent</h2>
+    <h3 class="title">Using the recommendations as a run-time formatter</h3>
+    <p class="desc">We plug the recommended encodings into the tool-output formatter of four tool-using agents (SpAgent, HuggingGPT, ViperGPT, ReVPT).
+      The ordering carries over where the tool is load-bearing, under four conditions.</p>
+    <div class="rules">
+      <div class="rule"><span class="rtag">Depth</span><h4>Plasma › turbo › gray, with the legend in mind</h4>
+        <p>Where the depth tool changes the answer, the Stage-I order reproduces (84.4 / 82.0 / 80.2 vs. 73.6 without the tool). Avoid colour-named legends (turbo: “blue = near”) when the task's own markers are blue or red, or add one sentence saying markers carry no depth meaning.</p></div>
+      <div class="rule"><span class="rtag">Segmentation</span><h4>Pick by subtype, not by “segmentation”</h4>
+        <p>Instance identity (counting) favours compact text serialisations; referring questions favour the overlay family. A single segmentation recommendation would be wrong for one of the two.</p></div>
+      <div class="rule"><span class="rtag">Text</span><h4>Keep the coordinate convention</h4>
+        <p>A text encoding transfers only with its serialisation: the recommended <code>xyxy</code> is in image <b>pixel</b> coordinates. A normalised variant can behave like injecting nothing.</p></div>
+      <div class="rule"><span class="rtag">Visibility</span><h4>The output has to reach the controller</h4>
+        <p>Encoding is a second-order lever: it only matters when the rendered output is fed back into the controller's context and the tool is actually called.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="benchmark">
+  <div class="wrap">
+    <h2 class="kicker">Benchmark</h2>
+    <h3 class="title">Four principles, four curation stages</h3>
+    <div class="principles">
+      <div class="pcard"><div class="pnum">i</div><h4>Error taxonomy</h4><p>Failure modes span a controlled set of task-specific categories grounded in prior literature, so coarse and subtle errors are not collapsed into one metric.</p></div>
+      <div class="pcard"><div class="pnum">ii</div><h4>Instance diversity</h4><p>24 public CV sources covering single-/multi-class, single-/multi-instance and varying-density scenes.</p></div>
+      <div class="pcard"><div class="pnum">iii</div><h4>Hierarchical candidates</h4><p>2–6 ranked candidates per (image, task), mixing model-zoo predictions with synthetically perturbed hard negatives.</p></div>
+      <div class="pcard"><div class="pnum">iv</div><h4>Encoding space</h4><p>49 image, text and mixed-modality formats per task, swept at evaluation time from the native prediction.</p></div>
+    </div>
+    <ol class="pipeline">
+      <li><span class="step">1</span><div><h4>Candidate generation</h4><p>A legacy-to-SOTA model zoo, expanded by test-time augmentation and post-processing sweeps (NMS thresholds, score cut-offs), plus rule-based perturbations (detection, pose) and LabelMe-crafted failures (dense segmentation).</p></div></li>
+      <li><span class="step">2</span><div><h4>Fine-grained review</h4><p>Single-metric tasks are ordered by raw score; multi-metric tasks (depth) need strict Pareto dominance; detection and segmentation enforce class-wise dominance; generation goes directly to human annotation.</p></div></li>
+      <li><span class="step">3</span><div><h4>Human verification</h4><p>Annotators rank candidates of the same source image under identical task and prompt configurations; only groups with strong human–metric consensus are kept.</p></div></li>
+      <li><span class="step">4</span><div><h4>Question generation</h4><p>Each ranked group yields <b>pairwise</b>, <b>scoring</b> (0–10) and <b>ranking</b> prompts through one skeleton: judge intro → format description → options → final question.</p></div></li>
+    </ol>
+
+    <h3 class="title sm">Generation &amp; low-level vision: can you judge them?</h3>
+    <p class="desc">Ranked candidates from the generative and restoration subsets. The options are shown in a shuffled order; click <b>Reveal</b> to see the ground-truth ranking.</p>
+    <div class="gallery" id="gallery"></div>
+
+    <h3 class="title sm">Task coverage</h3>
+    <div class="table-wrap">
+      <table class="cov" id="covTable">
+        <thead><tr><th>Task</th><th>Candidates</th><th class="r"># Groups</th><th class="r"># Cand.</th><th class="r"># Img.</th><th>Data sources</th><th>Model zoo / perturbations</th></tr></thead>
+        <tbody></tbody>
+        <tfoot><tr><td colspan="2"><b>Total</b></td><td class="r"><b>1,949</b></td><td class="r"><b>5,832</b></td><td class="r"><b>1,441</b></td><td colspan="2">unique images across tasks</td></tr></tfoot>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="section alt" id="data">
+  <div class="wrap">
+    <h2 class="kicker">Data</h2>
+    <h3 class="title">One COCO-adapted schema for every task</h3>
+    <p class="desc">Each task ships two JSON arrays joined on <code>image_id</code>: an <b>image side</b> (one record per unique image) and an <b>annotation side</b> (one record per image–candidate pair).
+      A single discriminator, <code>predictions_type</code>, selects the geometry keys, so the whole encoding space can be swept at evaluation time without re-curating the data.</p>
+    <div class="data-grid">
+      <div class="codecard">
+        <div class="codecard-h"><span>Quick start</span><button class="copy" data-copy="qs">copy</button></div>
+<pre id="qs"><code>from datasets import load_dataset
+from huggingface_hub import hf_hub_download
+import json
+
+# 230-row preview split (Dataset Viewer)
+ds = load_dataset("Anonymous-44kk/Vision-Judge", split="train")
+
+# full ranked candidates of one task
+p = hf_hub_download("Anonymous-44kk/Vision-Judge",
+        "annotations/object_detection_annotations.json",
+        repo_type="dataset")
+anns = json.load(open(p))
+print(anns[0]["predictions_type"], anns[0]["final_score"])</code></pre>
+      </div>
+      <div class="codecard">
+        <div class="codecard-h"><span>Annotation record</span><button class="copy" data-copy="rec">copy</button></div>
+<pre id="rec"><code>{
+  "id": "det_coco__det_1",
+  "task": "object_detection",
+  "image_id": "det_coco__coco_val2017_000000116208",
+  "model_name": "yolov8s",
+  "coi": ["pizza", "bottle", "dining table"],
+  "instance_type": "nCnI",      // 1C1I | 1CnI | nC1I | nCnI
+  "error_type": null,           // task-specific failure label
+  "final_score": 0.250,         // ground-truth quality in [0, 1]
+  "other_scores": {"mean_iou": 0.250, "iou_bin": "0.0-0.3"},
+  "predictions_type": "bbox",   // discriminator
+  "predictions": [ ... ]
+}</code></pre>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table class="ptype">
+        <thead><tr><th><code>predictions_type</code></th><th>Used by</th><th>Keys inside <code>predictions[i]</code></th></tr></thead>
+        <tbody>
+          <tr><td><code>bbox</code></td><td>detection</td><td>label, class_id, color_hex, bbox [x1, y1, x2, y2] (pixels)</td></tr>
+          <tr><td><code>polygon</code></td><td>inst. / sem. / ref. seg. (synthetic)</td><td>label, polygon [[x, y], …], matrix</td></tr>
+          <tr><td><code>rle</code></td><td>inst. seg. (model-based)</td><td>label, rle (COCO RLE), bbox, class_iou, score</td></tr>
+          <tr><td><code>mask</code></td><td>sem. seg. (model-based)</td><td>label, class_id, color_hex, image (PNG mask), url, matrix</td></tr>
+          <tr><td><code>keypoint</code></td><td>pose</td><td>label, keypoint (17 × 3 flat list: x, y, v), score, error_type</td></tr>
+          <tr><td><code>npy</code></td><td>depth</td><td>label, npy (raw float depth), image (colormap renders), url</td></tr>
+          <tr><td><code>image</code></td><td>generation, low-level</td><td>image (output PNG), url</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="bibtex">
+  <div class="wrap">
+    <h2 class="kicker">Citation</h2>
+    <div class="codecard">
+      <div class="codecard-h"><span>BibTeX</span><button class="copy" data-copy="bib">copy</button></div>
+<pre id="bib"><code>@inproceedings{visionjudge2027,
+  title     = {Evaluating Multi-modal Large Language Models as Judges for Vision Tasks},
+  author    = {Anonymous},
+  booktitle = {Under review},
+  year      = {2027}
+}</code></pre>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <p>Vision-Judge · anonymous project page for double-blind review. Images belong to their original datasets (COCO, OpenImages, Cityscapes, ADE20K, NYU Depth v2, gRefCOCO, GoPro, DIV2K, CelebA-HQ, …) under their respective licenses; annotations released under CC BY 4.0.</p>
+  </div>
+</footer>
+
+<script src="assets/results.js"></script>
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>

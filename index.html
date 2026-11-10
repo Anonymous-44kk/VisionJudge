@@ -169,56 +169,40 @@
 <section class="section alt" id="data">
   <div class="wrap">
     <h2 class="kicker">Data</h2>
-    <h3 class="title">One COCO-adapted schema for every task</h3>
-    <p class="desc">Each task ships two JSON arrays joined on <code>image_id</code>: an <b>image side</b> (one record per unique image) and an <b>annotation side</b> (one record per image–candidate pair).
-      A single discriminator, <code>predictions_type</code>, selects the geometry keys, so the whole encoding space can be swept at evaluation time without re-curating the data.</p>
+    <h3 class="title">One ranking row per input, candidates best first</h3>
+    <p class="desc">Each task is one config with a single <code>ranking</code> split. A row holds the input context (<code>coi</code>, <code>prompt</code>, <code>error_type</code>, <code>instance_type</code>) and its rendered candidate outputs in <code>media</code>, ordered best first, with the matching <code>annotation_ids</code>.</p>
     <div class="data-grid">
       <div class="codecard">
         <div class="codecard-h"><span>Quick start</span><button class="copy" data-copy="qs">copy</button></div>
 <pre id="qs"><code>from datasets import load_dataset
-from huggingface_hub import hf_hub_download
-import json
 
-# 230-row preview split (Dataset Viewer)
-ds = load_dataset("Anonymous-44kk/Vision-Judge", split="train")
+# one config per task, one "ranking" split each:
+# depth, generation, instance_segmentation_model,
+# instance_segmentation_synthetic, keypoint, lowlevel,
+# object_detection, referring_segmentation_model,
+# referring_segmentation_synthetic, semantic_segmentation
+ds = load_dataset("Anonymous-44kk/Vision-Judge",
+                  "object_detection", split="ranking")
 
-# full ranked candidates of one task
-p = hf_hub_download("Anonymous-44kk/Vision-Judge",
-        "annotations/object_detection_annotations.json",
-        repo_type="dataset")
-anns = json.load(open(p))
-print(anns[0]["predictions_type"], anns[0]["final_score"])</code></pre>
+row = ds[0]
+best, *rest = row["media"]     # candidates, best first (PIL images)
+print(row["coi"], len(row["media"]))</code></pre>
       </div>
       <div class="codecard">
-        <div class="codecard-h"><span>Annotation record</span><button class="copy" data-copy="rec">copy</button></div>
+        <div class="codecard-h"><span>Ranking row</span><button class="copy" data-copy="rec">copy</button></div>
 <pre id="rec"><code>{
-  "id": "det_coco__det_1",
   "task": "object_detection",
-  "image_id": "det_coco__coco_val2017_000000116208",
-  "model_name": "yolov8s",
-  "coi": ["pizza", "bottle", "dining table"],
-  "instance_type": "nCnI",      // 1C1I | 1CnI | nC1I | nCnI
+  "image_id": "…coco_val2017_000000078420",
   "error_type": null,           // task-specific failure label
-  "final_score": 0.250,         // ground-truth quality in [0, 1]
-  "other_scores": {"mean_iou": 0.250, "iou_bin": "0.0-0.3"},
-  "predictions_type": "bbox",   // discriminator
-  "predictions": [ ... ]
+  "instance_type": "1C1I",      // 1C1I | 1CnI | nC1I | nCnI
+  "coi": ["laptop"],            // classes of interest
+  "prompt": null,               // text query (referring / generation)
+  "media": [ &lt;img #1&gt;, &lt;img #2&gt;, &lt;img #3&gt;, &lt;img #4&gt; ],
+                                // rendered candidates, best first
+  "annotation_ids": [ "…det_472…", "…det_466…",
+                      "…det_473…", "…det_470…" ]
 }</code></pre>
       </div>
-    </div>
-    <div class="table-wrap">
-      <table class="ptype">
-        <thead><tr><th><code>predictions_type</code></th><th>Used by</th><th>Keys inside <code>predictions[i]</code></th></tr></thead>
-        <tbody>
-          <tr><td><code>bbox</code></td><td>detection</td><td>label, class_id, color_hex, bbox [x1, y1, x2, y2] (pixels)</td></tr>
-          <tr><td><code>polygon</code></td><td>inst. / sem. / ref. seg. (synthetic)</td><td>label, polygon [[x, y], …], matrix</td></tr>
-          <tr><td><code>rle</code></td><td>inst. seg. (model-based)</td><td>label, rle (COCO RLE), bbox, class_iou, score</td></tr>
-          <tr><td><code>mask</code></td><td>sem. seg. (model-based)</td><td>label, class_id, color_hex, image (PNG mask), url, matrix</td></tr>
-          <tr><td><code>keypoint</code></td><td>pose</td><td>label, keypoint (17 × 3 flat list: x, y, v), score, error_type</td></tr>
-          <tr><td><code>npy</code></td><td>depth</td><td>label, npy (raw float depth), image (colormap renders), url</td></tr>
-          <tr><td><code>image</code></td><td>generation, low-level</td><td>image (output PNG), url</td></tr>
-        </tbody>
-      </table>
     </div>
   </div>
 </section>

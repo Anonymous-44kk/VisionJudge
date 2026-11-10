@@ -147,7 +147,15 @@
 <section class="section" id="benchmark">
   <div class="wrap">
     <h2 class="kicker">Benchmark</h2>
-    <h3 class="title">Generation &amp; low-level vision</h3>
+    <h3 class="title">Curation pipeline</h3>
+    <p class="desc">(1) A prediction pool is built from 26 data sources with 65 specialised vision models and tools, plus synthetic error-typed candidates.
+      (2) Candidates are scored and ranked by agreement and dominance of task metrics; open-ended generation goes straight to human ranking.
+      (3) Rankings are validated by crowd-sourced annotators. (4) Each ranked group becomes pairwise, ranking and scoring judging questions.</p>
+    <figure class="pipeline-fig">
+      <a href="assets/img/curation_pipeline.webp" target="_blank" rel="noopener"><img src="assets/img/curation_pipeline.webp" alt="Vision-Judge curation pipeline: create prediction pool, score and rank predictions, crowd-source validation, judging questions" loading="lazy" width="2940" height="1279"></a>
+    </figure>
+
+    <h3 class="title sm">Generation &amp; low-level vision</h3>
     <p class="desc">Ranked candidates from the generative and restoration subsets. The options are shown in a shuffled order; click <b>Reveal</b> to see the ground-truth ranking.</p>
     <div class="gallery" id="gallery"></div>
 

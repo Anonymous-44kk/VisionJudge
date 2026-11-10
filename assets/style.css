@@ -256,3 +256,8 @@ table.lb tr.hidden { display: none; }
 .rec-list .bar .chance { position: absolute; top: -3px; bottom: -3px; border-left: 1.5px dashed var(--muted); }
 .rec-list .med { font: 500 .74rem var(--mono); text-align: right; color: var(--ink-2); }
 .rec-list .basetag { font-size: .62rem; font-weight: 800; color: var(--bg); background: var(--ink); padding: 1px 5px; border-radius: 4px; }
+
+/* curation pipeline figure (white artwork: keep a white card in dark mode too) */
+.pipeline-fig { margin: 18px 0 8px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 12px; box-shadow: var(--shadow); }
+.pipeline-fig img { display: block; width: 100%; height: auto; }
+@media (max-width: 640px) { .pipeline-fig { padding: 6px; overflow-x: auto; } .pipeline-fig img { min-width: 640px; } }

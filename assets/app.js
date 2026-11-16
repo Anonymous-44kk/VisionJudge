@@ -180,7 +180,7 @@
   const recGrid = $('#recGrid');
   D.tasks.forEach((t, ti) => {
     const rec = REC[t.key]; if (!rec) return;
-    const encs = t.candidates[0].encodings, lo = .45, hi = .65;
+    const encs = t.candidates[0].encodings, lo = .45, hi = .85;
     const card = document.createElement('div'); card.className = 'rec-card';
     card.innerHTML = `<div class="rec-h"><h4>${esc(t.title)}</h4><span class="small muted">${rec.length} encodings ranked</span></div>
       <ol class="rec-list">${rec.map((r, k) => {

@@ -5,26 +5,26 @@
 🌐 **Project page:** https://anonymous-44kk.github.io/VisionJudge/ · 🤗 **Dataset:** https://huggingface.co/datasets/Anonymous-44kk/Vision-Judge
 
 Tool-using MLLM agents have to read the outputs of vision tools (boxes, masks, keypoints, depth maps) before acting on them.
-How that output is encoded back into the model matters: two encodings of the same prediction can differ by **10–20 pp** in judging accuracy.
-Vision-Judge sweeps **49 encodings** over **7 task categories** (1,949 ranked groups, 5,832 candidates, 1,441 images) with **36 MLLM judges**. For each task it gives a recommended encoding order, which we then validate inside tool-using agents.
+How that output is encoded back into the model matters: two encodings of the same prediction can differ by up to **19 pp** in judging accuracy.
+Vision-Judge evaluates **33 MLLM judges** over **8 task families** (1,750 ranked instances, 5,259 candidates, 1,302 input images from 24 datasets) and sweeps **39 encodings**. For each task it gives a recommended encoding order, which we then test inside tool-using agents.
 
 ## Recommended encoding order
 
-The table ranks encodings by median pairwise judging accuracy across judges, on the controlled encoding-analysis subset. **Bold** marks the top encoding and *(base)* marks the typical tool output.
+The table ranks encodings by median pairwise judging accuracy across the 11 judges of the controlled encoding-analysis subset (7,600 questions). **Bold** marks the top encoding and *(base)* marks the typical tool output.
 
 | Task | Recommended order (median accuracy) |
 |---|---|
-| Object detection | **text `[x1,y1,x2,y2]` in pixels (.618)** › box-only overlay (.59) › box+label overlay *(base)* (.585) › text `[x,y,w,h]` (.58) › separate canvas (.57) |
-| Instance segmentation | **colour by instance (.565)** › overlay + labels + dashed box *(base)* (.558) › opacity 100% (.547) › separate canvas (.545) › no box (.537) › down-sampled text / overlay (.535) › polygon text (.533) |
-| Semantic segmentation | **down-sampled class-id text matrix (.555)** › separate canvas (.548) › random palette (.518) › overlay α=0.5 + labels *(base)* (.500) |
-| Referring segmentation | **separate canvas (.62)** › contour only (.60) › down-sampled separate (.59) › fill + contour (.585) › down-sampled overlay (.585) › overlay + fill *(base)* (.567) › polygon text / opacity 100% / text matrix (.53) |
-| Keypoint | **skeleton, colour by instance *(base)* (.555)** › same colour (.55) › part-keyed JSON (.54) › points only (.535) › flat list (.53) › separate canvas (.52) |
-| Depth | **plasma *(base)* (.562)** › turbo (.550) › gray (.532) |
+| Object detection | **Labeled boxes on image *(base)* (.767)** › Unlabeled boxes on image (.767) › [x₁, y₁, x₂, y₂] (text) (.721) › Boxes on black image (.709) › [x, y, w, h] (text) (.651) |
+| Instance segmentation | **Opaque overlay (α = 1) (.789)** › Masks on black image (.779) › Per-instance colors (.772) › Overlay without boxes (.768) › Overlay, α = 0.5 *(base)* (.765) › Binary grid on image (.740) › Binary grid (text) (.734) › Overlay without labels (.723) › Binary grid on black image (.720) › Polygon (text) (.671) |
+| Semantic segmentation | **Overlay, α = 0.5 *(base)* (.594)** › Labeled mask on black image (.587) › Class-ID grid (text) (.568) › Class-ID grid on image (.516) › Low-res mask on black image (.516) |
+| Referring segmentation | **Outline only (.747)** › Mask on black image (.713) › Filled mask + outline (.678) › Overlay, α = 0.5 *(base)* (.661) › Opaque overlay (α = 1) (.633) › Binary grid (text) (.609) › Binary grid on black image (.595) › Binary grid on image (.595) › Polygon (text) (.554) |
+| Keypoint | **Part-keyed JSON (text) (.725)** › Skeleton on black image (.725) › Per-instance colors *(base)* (.714) › Flat coordinate list (text) (.670) › Skeleton on image (.648) › Single-color skeleton (.637) › Joints only (no limbs) (.571) |
+| Depth | **Grayscale (.742)** › Plasma colormap *(base)* (.742) › Turbo colormap (.719) |
 
-When you use these encodings as an agent's tool-output formatter:
-- keep the coordinate convention of text encodings (pixel `xyxy`);
-- avoid colour-named depth legends when the task's own markers use those colours;
-- make sure the rendered output actually reaches the controller.
+In tool-using agents (SpAgent, ViperGPT, ReVPT):
+- Vision-Judge accuracy predicts accuracy on CV-Bench with tools (r = 0.90 across 10 controllers);
+- encoding preferences transfer where judging separates encodings clearly, and can be model-specific: a controller whose own judging departs from the average (Qwen2.5-VL-72B prefers `[x1, y1, x2, y2]` text for detection) follows its own preference;
+- near-ties in judging (label size, depth colormaps) give no reliable agent difference.
 
 ## Repository
 

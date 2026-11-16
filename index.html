@@ -56,15 +56,15 @@
     <h2 class="kicker">TL;DR</h2>
     <p class="lead">Tool-using MLLM agents must <em>read</em> the outputs of vision tools (boxes, masks, keypoints, depth maps) before acting on them, and
       <b>how</b> a tool's output is encoded back into the model changes how well it is read: the best and worst encoding of the same prediction differ by
-      <b>10–20 pp</b> of judging accuracy. <b>Vision-Judge</b> sweeps 49 encodings with 36 MLLM judges and gives a <b>recommended encoding order for every task</b>,
-      which we then validate inside tool-using agents.</p>
+      up to <b>19 pp</b> of judging accuracy. <b>Vision-Judge</b> evaluates 33 MLLM judges, sweeps 39 encodings and gives a <b>recommended encoding order for every task</b>,
+      which we then test inside tool-using agents: judging accuracy predicts tool-use accuracy (<i>r</i> = 0.90), and encoding preferences carry over, in part model-specifically.</p>
     <div class="stats" id="stats">
-      <div class="stat"><span class="num" data-to="36">0</span><span class="lbl">MLLM judges</span></div>
-      <div class="stat"><span class="num" data-to="7">0</span><span class="lbl">task categories</span></div>
-      <div class="stat"><span class="num" data-to="1949">0</span><span class="lbl">ranked groups</span></div>
-      <div class="stat"><span class="num" data-to="5832">0</span><span class="lbl">ranked candidates</span></div>
-      <div class="stat"><span class="num" data-to="1441">0</span><span class="lbl">unique images</span></div>
-      <div class="stat"><span class="num" data-to="49">0</span><span class="lbl">answer encodings</span></div>
+      <div class="stat"><span class="num" data-to="33">0</span><span class="lbl">MLLM judges</span></div>
+      <div class="stat"><span class="num" data-to="8">0</span><span class="lbl">task families</span></div>
+      <div class="stat"><span class="num" data-to="1750">0</span><span class="lbl">ranked instances</span></div>
+      <div class="stat"><span class="num" data-to="5259">0</span><span class="lbl">ranked candidates</span></div>
+      <div class="stat"><span class="num" data-to="1302">0</span><span class="lbl">unique input images</span></div>
+      <div class="stat"><span class="num" data-to="39">0</span><span class="lbl">output encodings</span></div>
     </div>
   </div>
 </section>
@@ -73,7 +73,7 @@
   <div class="wrap">
     <h2 class="kicker">Main result</h2>
     <h3 class="title">Recommended encoding order, per task</h3>
-    <p class="desc">Encodings ranked by their <b>median pairwise judging accuracy across judges</b> on the controlled encoding-analysis subset (prompt, candidate pair and
+    <p class="desc">Encodings ranked by their <b>median pairwise judging accuracy across the 11 judges</b> of the controlled encoding-analysis subset (7,600 questions) (prompt, candidate pair and
       ground-truth winner held fixed; only the encoding changes). <b>①</b> is what we recommend feeding back to an MLLM for that tool; the bar shows the median, the dashed line chance (0.5).
       Click any row to open it in the explorer.</p>
     <div class="rec-grid" id="recGrid"></div>
@@ -84,8 +84,9 @@
   <div class="wrap">
     <h2 class="kicker">Interactive</h2>
     <h3 class="title">Encoding Explorer</h3>
-    <p class="desc">The encoding space is factorised as <span class="math">E = I × T × Z</span>: image-side variables, text-side variables, and the modality mix
-      (image-only, text-only, image + text). For each task a <b>base</b> encoding mirrors typical tool output, and each ablation changes one factor.
+    <p class="desc">An encoding has an optional visual part <span class="math">i ∈ I</span> and an optional textual part <span class="math">t ∈ T</span>, with at least one present:
+      <span class="math">E = (I ∪ {∅}) × (T ∪ {∅}) ∖ {(∅, ∅)}</span>, so the modality (image only, text only, image + text) follows from which parts are present.
+      Each encoding also fixes the instruction that tells the judge how to read it (palette, label placement, colormap, coordinate convention). For each task a <b>base</b> encoding mirrors typical tool output, and each ablation changes one factor.
       Pick a task and a candidate. The viewer <b>auto-stitches</b> through every encoding of the <em>same</em> prediction; switch to <b>Compare</b> and drag the seam to diff two encodings.
       All renders below come from the benchmark's own encoders.</p>
 
@@ -129,17 +130,17 @@
   <div class="wrap">
     <h2 class="kicker">From judge to agent</h2>
     <h3 class="title">Using the recommendations as a run-time formatter</h3>
-    <p class="desc">We plug the recommended encodings into the tool-output formatter of four tool-using agents (SpAgent, HuggingGPT, ViperGPT, ReVPT).
-      The ordering carries over where the tool is load-bearing, under four conditions.</p>
+    <p class="desc">Ten open-weight SpAgent controllers, and three controllers (Gemini 3.5 Flash-Lite, Gemini 3.8 Flash, Qwen2.5-VL-72B) in three tool-using frameworks
+      (SpAgent, ViperGPT, ReVPT), on CV-Bench rephrased, NYU depth pairs and COCO crowd counting.</p>
     <div class="rules">
-      <div class="rule"><span class="rtag">Depth</span><h4>Plasma › turbo › gray, with the legend in mind</h4>
-        <p>Where the depth tool changes the answer, the Stage-I order reproduces (84.4 / 82.0 / 80.2 vs. 73.6 without the tool). Avoid colour-named legends (turbo: “blue = near”) when the task's own markers are blue or red, or add one sentence saying markers carry no depth meaning.</p></div>
-      <div class="rule"><span class="rtag">Segmentation</span><h4>Pick by subtype, not by “segmentation”</h4>
-        <p>Instance identity (counting) favours compact text serialisations; referring questions favour the overlay family. A single segmentation recommendation would be wrong for one of the two.</p></div>
-      <div class="rule"><span class="rtag">Text</span><h4>Keep the coordinate convention</h4>
-        <p>A text encoding transfers only with its serialisation: the recommended <code>xyxy</code> is in image <b>pixel</b> coordinates. A normalised variant can behave like injecting nothing.</p></div>
-      <div class="rule"><span class="rtag">Visibility</span><h4>The output has to reach the controller</h4>
-        <p>Encoding is a second-order lever: it only matters when the rendered output is fed back into the controller's context and the tool is actually called.</p></div>
+      <div class="rule"><span class="rtag">Prediction</span><h4>Judging accuracy predicts tool-use accuracy</h4>
+        <p>Across 10 controllers, Vision-Judge accuracy correlates with CV-Bench accuracy with tools at <i>r</i> = 0.90 (&rho; = 0.93), and at <i>r</i> = 0.79&ndash;0.92 for every question type. Generation, depth and instance-segmentation judging track it most closely; detection judging least (<i>r</i> = 0.32).</p></div>
+      <div class="rule"><span class="rtag">Detection</span><h4>Preferences transfer, and can be model-specific</h4>
+        <p>The top judges prefer labelled boxes with text, and so do the Gemini agents (best in 4 of 6 controller&ndash;framework pairs; text-only costs up to 5.3 pts). Qwen2.5-VL-72B's own judging ranks <code>[x1, y1, x2, y2]</code> text first, and its agents agree (best with ReVPT, +4.4, and ViperGPT). For a controller that departs from the average, its own ranking is the better guide.</p></div>
+      <div class="rule"><span class="rtag">Ties</span><h4>A near-tie predicts no reliable winner</h4>
+        <p>Small vs. big detection labels (both .870) change agent accuracy by &minus;2.4 to +1.8 pts with no consistent sign; Turbo, Plasma and grayscale depth (.798 / .796 / .791) lie within 3 pts in 14 of 18 columns, and the winner changes with framework and benchmark.</p></div>
+      <div class="rule"><span class="rtag">Segmentation</span><h4>A judging gap need not become an agent gap</h4>
+        <p>Polygon text trails masks on black by 8.6 pts in judging, yet in SpAgent crowd counting the four instance encodings lie within 2.5 pts for every controller, within run-to-run spread.</p></div>
     </div>
   </div>
 </section>
@@ -148,7 +149,7 @@
   <div class="wrap">
     <h2 class="kicker">Benchmark</h2>
     <h3 class="title">Curation pipeline</h3>
-    <p class="desc">(1) A prediction pool is built from 26 data sources with 65 specialised vision models and tools, plus synthetic error-typed candidates.
+    <p class="desc">(1) A prediction pool is built from 24 data sources with 81 specialised vision models and tools, plus synthetic error-typed candidates.
       (2) Candidates are scored and ranked by agreement and dominance of task metrics; open-ended generation goes straight to human ranking.
       (3) Rankings are validated by crowd-sourced annotators. (4) Each ranked group becomes pairwise, ranking and scoring judging questions.</p>
     <figure class="pipeline-fig">
@@ -158,9 +159,9 @@
     <h3 class="title sm">Task coverage</h3>
     <div class="table-wrap">
       <table class="cov" id="covTable">
-        <thead><tr><th>Task</th><th>Candidates</th><th class="r"># Groups</th><th class="r"># Cand.</th><th class="r"># Img.</th><th>Data sources</th><th>Model zoo / perturbations</th></tr></thead>
+        <thead><tr><th>Task</th><th>Candidates</th><th class="r"># Inst.</th><th class="r"># Cand.</th><th class="r"># Img.</th><th>Data sources</th><th>Model zoo / perturbations</th></tr></thead>
         <tbody></tbody>
-        <tfoot><tr><td colspan="2"><b>Total</b></td><td class="r"><b>1,949</b></td><td class="r"><b>5,832</b></td><td class="r"><b>1,441</b></td><td colspan="2">unique images across tasks</td></tr></tfoot>
+        <tfoot><tr><td colspan="2"><b>Total</b></td><td class="r"><b>1,750</b></td><td class="r"><b>5,259</b></td><td class="r"><b>1,302</b></td><td colspan="2">unique input images across tasks (24 datasets)</td></tr></tfoot>
       </table>
     </div>
   </div>

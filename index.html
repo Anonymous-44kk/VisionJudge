@@ -54,7 +54,7 @@
     <p class="lead">Tool-using MLLM agents must <em>read</em> the outputs of vision tools (boxes, masks, keypoints, depth maps) before acting on them, and
       <b>how</b> a tool's output is encoded back into the model changes how well it is read: the best and worst encoding of the same prediction differ by
       up to <b>19 pp</b> of judging accuracy. <b>Vision-Judge</b> evaluates 33 MLLM judges, sweeps 38 encodings and gives a <b>recommended encoding order for every task</b>,
-      which we then test inside tool-using agents: judging accuracy predicts tool-use accuracy (<i>r</i> = 0.90), and encoding preferences carry over, in part model-specifically.</p>
+      which we then test inside tool-using agents: judging accuracy correlates with tool-use accuracy (<i>r</i> = 0.90), while encoding effects in agents are smaller than in judging.</p>
     <div class="stats" id="stats">
       <div class="stat"><span class="num" data-to="33">0</span><span class="lbl">MLLM judges</span></div>
       <div class="stat"><span class="num" data-to="8">0</span><span class="lbl">task families</span></div>
@@ -130,10 +130,10 @@
     <p class="desc">Ten open-weight SpAgent controllers, and three controllers (Gemini 3.5 Flash-Lite, Gemini 3.8 Flash, Qwen2.5-VL-72B) in three tool-using frameworks
       (SpAgent, ViperGPT, ReVPT), on CV-Bench rephrased, NYU depth pairs and COCO crowd counting.</p>
     <div class="rules">
-      <div class="rule"><span class="rtag">Prediction</span><h4>Judging accuracy predicts tool-use accuracy</h4>
+      <div class="rule"><span class="rtag">Correlation</span><h4>Judging accuracy correlates with tool-use accuracy</h4>
         <p>Across 10 controllers, Vision-Judge accuracy correlates with CV-Bench accuracy with tools at <i>r</i> = 0.90 (&rho; = 0.93), and at <i>r</i> = 0.79&ndash;0.92 for every question type. Generation, depth and instance-segmentation judging track it most closely; detection judging least (<i>r</i> = 0.32).</p></div>
-      <div class="rule"><span class="rtag">Detection</span><h4>Preferences transfer, and can be model-specific</h4>
-        <p>The top judges prefer labelled boxes with text, and so do the Gemini agents (best in 4 of 6 controller&ndash;framework pairs; text-only costs up to 5.3 pts). Qwen2.5-VL-72B's own judging ranks <code>[x1, y1, x2, y2]</code> text first, and its agents agree (best with ReVPT, +4.4, and ViperGPT). For a controller that departs from the average, its own ranking is the better guide.</p></div>
+      <div class="rule"><span class="rtag">Detection</span><h4>Effects are small and only loosely follow judging</h4>
+        <p>The four detection encodings lie within 3 pts of each other in 7 of 9 controller&ndash;framework pairs, comparable to run-to-run variation. The two larger effects are loosely consistent with judging: text-only costs Gemini 3.8 Flash 5.3 pts in ViperGPT, while Qwen2.5-VL-72B, whose own judging ranks <code>[x1, y1, x2, y2]</code> text higher than the average does, gains 4.4 pts with it in ReVPT.</p></div>
       <div class="rule"><span class="rtag">Ties</span><h4>A near-tie predicts no reliable winner</h4>
         <p>Small vs. big detection labels (both .870) change agent accuracy by &minus;2.4 to +1.8 pts with no consistent sign; Turbo, Plasma and grayscale depth (.798 / .796 / .791) lie within 3 pts in 14 of 18 columns, and the winner changes with framework and benchmark.</p></div>
       <div class="rule"><span class="rtag">Segmentation</span><h4>A judging gap need not become an agent gap</h4>

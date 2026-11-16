@@ -22,8 +22,8 @@ The table ranks encodings by median pairwise judging accuracy across the 11 judg
 | Depth | **Grayscale (.742)** › Plasma colormap *(base)* (.742) › Turbo colormap (.719) |
 
 In tool-using agents (SpAgent, ViperGPT, ReVPT):
-- Vision-Judge accuracy predicts accuracy on CV-Bench with tools (r = 0.90 across 10 controllers);
-- encoding preferences transfer where judging separates encodings clearly, and can be model-specific: a controller whose own judging departs from the average (Qwen2.5-VL-72B prefers `[x1, y1, x2, y2]` text for detection) follows its own preference;
+- Vision-Judge accuracy correlates with accuracy on CV-Bench with tools (r = 0.90 across 10 controllers);
+- encoding effects in agents are smaller than in judging: most lie within run-to-run variation, and the few larger ones are at most loosely consistent with the controller's own judging ranking;
 - near-ties in judging (label size, depth colormaps) give no reliable agent difference.
 
 ## Repository

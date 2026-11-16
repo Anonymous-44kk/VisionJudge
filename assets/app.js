@@ -33,6 +33,7 @@
       <div class="t-cap"><span class="t-task">${esc(t.title)}</span><span class="t-enc"></span></div>`;
     mosaic.appendChild(tile);
     const base = $('.t-base', tile), top = $('.t-top', tile), seam = $('.t-seam', tile), lab = $('.t-enc', tile);
+    if (t.focus) base.style.objectPosition = top.style.objectPosition = t.focus;   // keep the target in the cropped tile
     let i = 0; base.src = encs[0].src; lab.textContent = encs[0].label;
     tile.onclick = () => { selectTask(ti); document.getElementById('explorer').scrollIntoView({ behavior: 'smooth' }); };
     if (reduce || encs.length < 2) return;

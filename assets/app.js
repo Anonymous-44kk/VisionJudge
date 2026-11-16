@@ -27,7 +27,7 @@
   /* ---------- hero mosaic: each tile wipes through encodings of one prediction ---------- */
   const mosaic = $('#mosaic');
   D.tasks.forEach((t, ti) => {
-    const encs = t.candidates[0].encodings.filter(e => e.src && !e.same_as);   // skip renders identical to another encoding for this sample
+    const encs = t.candidates[t.hero || 0].encodings.filter(e => e.src && e.kind === 'img' && !e.same_as);   // image-only encodings, no identical renders
     const tile = document.createElement('div'); tile.className = 'tile';
     tile.innerHTML = `<img class="t-base" alt=""><img class="t-top" alt=""><div class="t-seam"></div>
       <div class="t-cap"><span class="t-task">${esc(t.title)}</span><span class="t-enc"></span></div>`;

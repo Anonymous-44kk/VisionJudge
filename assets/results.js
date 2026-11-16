@@ -1,5 +1,5 @@
 // Numbers from the paper: leaderboard table (judge-analysis subset, 33 judges), Vision-Judge vs CV-Bench-with-tools correlation
-// (10 SpAgent controllers), Table S5 (task coverage, v5 release), encoding-ranking figure (encoding-analysis subset, 11 judges).
+// (10 SpAgent controllers), Table S5 (task coverage), encoding-ranking figure (encoding-analysis subset, 11 judges).
 window.VJ_RESULTS = {
   cols: ['All', 'Det.', 'I-Seg', 'S-Seg', 'R-Seg', 'Kpt.', 'Depth', 'Gen.', 'Low-lvl'],
   leaderboard: [

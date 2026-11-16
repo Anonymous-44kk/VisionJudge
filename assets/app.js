@@ -27,7 +27,7 @@
   /* ---------- hero mosaic: each tile wipes through encodings of one prediction ---------- */
   const mosaic = $('#mosaic');
   D.tasks.forEach((t, ti) => {
-    const encs = t.candidates[0].encodings.filter(e => e.src);
+    const encs = t.candidates[0].encodings.filter(e => e.src && !e.same_as);   // skip renders identical to another encoding for this sample
     const tile = document.createElement('div'); tile.className = 'tile';
     tile.innerHTML = `<img class="t-base" alt=""><img class="t-top" alt=""><div class="t-seam"></div>
       <div class="t-cap"><span class="t-task">${esc(t.title)}</span><span class="t-enc"></span></div>`;
@@ -89,7 +89,7 @@
     if (t.expr) meta.push(`<span class="chip">Referring expression: <b>“${esc(t.expr)}”</b></span>`);
     meta.push(`<span class="chip">${c.encodings.filter(e => e.kind === 'img').length} image · ${c.encodings.filter(e => e.kind === 'txt').length} text · ${c.encodings.filter(e => e.kind === 'combo').length} mixed</span>`);
     $('#stageMeta').innerHTML = meta.join('');
-    $('#encList').innerHTML = c.encodings.map((e, i) => `<li data-i="${i}"><span class="rnk ${e.rank ? '' : 'none'}">${e.rank ? CIRC(e.rank) : '·'}</span><span>${esc(e.label)}</span>${e.base ? '<span class="basetag">BASE</span>' : ''}<span class="kind ${e.kind}">${e.kind === 'combo' ? 'img+txt' : e.kind}</span></li>`).join('');
+    $('#encList').innerHTML = c.encodings.map((e, i) => `<li data-i="${i}"><span class="rnk ${e.rank ? '' : 'none'}">${e.rank ? CIRC(e.rank) : '·'}</span><span>${esc(e.label)}${e.same_as ? ` <span class="small muted">(same image as ${esc(e.same_as)} for this sample)</span>` : ''}</span>${e.base ? '<span class="basetag">BASE</span>' : ''}<span class="kind ${e.kind}">${e.kind === 'combo' ? 'img+txt' : e.kind}</span></li>`).join('');
     $$('#encList li').forEach(li => li.onclick = ev => {
       const i = +li.dataset.i;
       if (st.mode === 'compare') { if (ev.shiftKey || ev.altKey) st.cmpB = i; else { st.cmpA = i; if (st.cmpB === i) st.cmpB = (i + 1) % C().encodings.length; } drawCompare(); }
@@ -134,7 +134,9 @@
     const my = ++runId;
     while (st.mode === 'auto' && my === runId) {
       const e = E(st.enc); await hold(e.kind === 'img' ? 2200 : 3600); if (st.mode !== 'auto' || my !== runId) return;
-      const j = (st.enc + 1) % C().encodings.length; setLabels(E(j)); markListTo(j); await wipeTo(j);
+      const N = C().encodings.length; let j = (st.enc + 1) % N;
+      for (let k = 0; k < N && E(j).same_as; k++) j = (j + 1) % N;   // auto-play skips renders identical to another encoding
+      setLabels(E(j)); markListTo(j); await wipeTo(j);
     }
   }
   function markListTo(j) { const k = st.enc; st.enc = j; markList(); st.enc = k; }

@@ -154,7 +154,7 @@
     if (st.mode === 'auto') { st.enc = 0; showStatic(0); setLabels(E(0)); markList(); autoLoop(); }
     else { st.cmpA = 0; st.cmpB = Math.min(1, C().encodings.length - 1); drawCompare(); }
   }
-  function selectTask(i) { st.task = i; st.cand = 0; restart(); }
+  function selectTask(i) { st.task = i; st.cand = D.tasks[i].hero || 0; restart(); }
   $$('#modeSeg button').forEach(b => b.onclick = () => {
     st.mode = b.dataset.mode; $$('#modeSeg button').forEach(x => x.classList.toggle('on', x === b));
     stage.classList.toggle('compare', st.mode === 'compare'); seam.style.opacity = ''; restart();
